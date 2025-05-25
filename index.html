@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Filmes</title>
+</head>
+<body>
+  <h1>Filmes</h1>
+  <ul id="lista-filmes"></ul>
+
+  <script>
+    fetch('http://localhost:3000/filmes')
+      .then(res => res.json())
+      .then(data => {
+        const lista = document.getElementById('lista-filmes');
+        data.forEach(filme => {
+          const li = document.createElement('li');
+          li.innerHTML = `<a href="detalhes.html?id=${filme.id}">${filme.titulo}</a>`;
+          lista.appendChild(li);
+        });
+      });
+  </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalhes do Filme</title>
+</head>
+<body>
+  <h1>Detalhes do Filme</h1>
+  <div id="detalhes"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+
+    fetch(`http://localhost:3000/filmes/${id}`)
+      .then(res => res.json())
+      .then(filme => {
+        const div = document.getElementById('detalhes');
+        div.innerHTML = `
+          <h2>${filme.titulo}</h2>
+          <p><strong>Diretor:</strong> ${filme.diretor}</p>
+          <p><strong>Ano:</strong> ${filme.ano}</p>
+          <p><strong>Gênero:</strong> ${filme.genero}</p>
+        `;
+      });
+  </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Cadastro de Filmes</title>
+</head>
+<body>
+  <h1>Cadastro de Filmes</h1>
+  <form id="form-filme">
+    <input type="hidden" id="filme-id">
+    <input type="text" id="titulo" placeholder="Título" required><br>
+    <input type="text" id="diretor" placeholder="Diretor" required><br>
+    <input type="number" id="ano" placeholder="Ano" required><br>
+    <input type="text" id="genero" placeholder="Gênero" required><br>
+    <button type="submit">Salvar</button>
+  </form>
+
+  <h2>Filmes Cadastrados</h2>
+  <ul id="lista-filmes"></ul>
+
+  <script>
+    const form = document.getElementById('form-filme');
+    const lista = document.getElementById('lista-filmes');
+    const url = 'http://localhost:3000/filmes';
+
+    function carregarFilmes() {
+      fetch(url)
+        .then(res => res.json())
+        .then(filmes => {
+          lista.innerHTML = '';
+          filmes.forEach(filme => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+              ${filme.titulo} (${filme.ano})
+              <button onclick="editarFilme(${filme.id})">Editar</button>
+              <button onclick="excluirFilme(${filme.id})">Excluir</button>
+            `;
+            lista.appendChild(li);
+          });
+        });
+    }
+
+    function editarFilme(id) {
+      fetch(`${url}/${id}`)
+        .then(res => res.json())
+        .then(filme => {
+          document.getElementById('filme-id').value = filme.id;
+          document.getElementById('titulo').value = filme.titulo;
+          document.getElementById('diretor').value = filme.diretor;
+          document.getElementById('ano').value = filme.ano;
+          document.getElementById('genero').value = filme.genero;
+        });
+    }
+
+    function excluirFilme(id) {
+      fetch(`${url}/${id}`, { method: 'DELETE' })
+        .then(() => carregarFilmes());
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const id = document.getElementById('filme-id').value;
+      const filme = {
+        titulo: form.titulo.value,
+        diretor: form.diretor.value,
+        ano: Number(form.ano.value),
+        genero: form.genero.value
+      };
+      const metodo = id ? 'PUT' : 'POST';
+      const endpoint = id ? `${url}/${id}` : url;
+
+      fetch(endpoint, {
+        method: metodo,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(filme)
+      })
+      .then(() => {
+        form.reset();
+        carregarFilmes();
+      });
+    });
+
+    carregarFilmes();
+  </script>
+</body>
+</html>
