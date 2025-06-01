@@ -18,3 +18,12 @@ Turma: [Análise e desenolvimento de sistemas]
 
 ## Print da aba Network (XHR)
 ![XHR POST](./prints/network-post.png)
+
+## 📊 Visualização Dinâmica com Chart.js
+
+Nesta versão, foi implementado um gráfico de pizza interativo que mostra a **quantidade de filmes por gênero** cadastrados no sistema.
+
+### Prints da funcionalidade:
+
+![Print 1](./prints/print1.png)
+![Print 2](./prints/print2.png)
